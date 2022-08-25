@@ -1,0 +1,15 @@
+[package]
+name = "prime-field"
+version = "0.1.0"
+edition = "2021"
+
+[dev-dependencies]
+criterion = "*"
+
+[dependencies]
+itertools = "*"
+rand = "*"
+
+[[bench]]
+name = "add_mul"
+harness = false
