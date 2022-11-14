@@ -42,7 +42,7 @@ fn add_benchmark(c: &mut Criterion) {
     add_group.bench_function(id, |bencher| {
         bencher.iter(|| {
             for (&x, &y) in operands.iter().tuple_windows() {
-                prime_field::add_fast(x, y);
+                prime_field::add_winterfell(x, y);
             }
         });
     });
