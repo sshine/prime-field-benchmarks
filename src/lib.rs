@@ -4,12 +4,14 @@ use rand::{thread_rng, Rng};
 pub const P64: u64 = 0xffff_ffff_0000_0001;
 pub const P128: u128 = 0xffff_ffff_0000_0001;
 
-pub fn add(x: u64, y: u64) -> u64 {
+/// Performs addition with modulo using `%` operator
+pub fn add_modulo(x: u64, y: u64) -> u64 {
     let sum: u128 = x as u128 + y as u128;
     (sum % P128) as u64
 }
 
-pub fn add_fast(x: u64, y: u64) -> u64 {
+/// Performs addition with subtraction using `u128` type
+pub fn add_with_sub_u128(x: u64, y: u64) -> u64 {
     let mut sum: u128 = x as u128 + y as u128;
     if sum > P128 {
         sum -= P128;
@@ -17,6 +19,7 @@ pub fn add_fast(x: u64, y: u64) -> u64 {
     sum as u64
 }
 
+/// Performs addition with `.overflowing_sub()`
 pub fn add_winterfell(x: u64, y: u64) -> u64 {
     // a + b = a - (p - b)
     let (x1, c1) = x.overflowing_sub(P64 - y);
@@ -24,16 +27,19 @@ pub fn add_winterfell(x: u64, y: u64) -> u64 {
     x1.wrapping_sub(adj as u64)
 }
 
-pub fn mul(x: u64, y: u64) -> u64 {
+/// Performs multiplication with modulo using `%` operator
+pub fn mul_modulo(x: u64, y: u64) -> u64 {
     let product: u128 = x as u128 * y as u128;
     (product % P128) as u64
 }
 
+/// Performs multiplication with `reduce159` as prime-specific modular reduction
 pub fn mul_reduce159(x: u64, y: u64) -> u64 {
     let product: u128 = x as u128 * y as u128;
     reduce159(product)
 }
 
+/// Performs multiplication with `reduce_montgomery` as prime-specific modular reduction
 pub fn mul_reduce_montgomery(x: u64, y: u64) -> u64 {
     let product: u128 = x as u128 * y as u128;
     reduce_montgomery(product)
@@ -45,10 +51,10 @@ pub fn mul_reduce_montgomery(x: u64, y: u64) -> u64 {
 /// - d contains 32 most significant bits.
 ///
 /// x is broken into corresponding values as shown below
-const LOWER_MASK: u64 = 0xffff_ffff;
-
 #[inline(always)]
 fn reduce159(x: u128) -> u64 {
+    const LOWER_MASK: u64 = 0xffff_ffff;
+
     let ab = x as u64;
     let cd = (x >> 64) as u64;
     let c = (cd as u32) as u64;
@@ -103,8 +109,8 @@ mod tests {
         let n_operations = 1_000;
         let operands = random_elements(n_operations + 1);
         for (&x, &y) in operands.iter().tuple_windows() {
-            assert_eq!(add(x, y), add_fast(x, y));
-            assert_eq!(add(x, y), add_winterfell(x, y));
+            assert_eq!(add_modulo(x, y), add_with_sub_u128(x, y));
+            assert_eq!(add_modulo(x, y), add_winterfell(x, y));
         }
     }
 
@@ -113,7 +119,7 @@ mod tests {
         let n_operations = 1_000;
         let operands = random_elements(n_operations + 1);
         for (&x, &y) in operands.iter().tuple_windows() {
-            let expected_product = mul(x, y);
+            let expected_product = mul_modulo(x, y);
             assert_eq!(expected_product, mul_reduce159(x, y));
 
             let expected_montgomery_product = reduce_montgomery(expected_product as u128);

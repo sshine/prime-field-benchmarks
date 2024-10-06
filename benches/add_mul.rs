@@ -24,7 +24,7 @@ fn add_benchmark(c: &mut Criterion) {
     add_group.bench_function(id, |bencher| {
         bencher.iter(|| {
             for (&x, &y) in operands.iter().tuple_windows() {
-                prime_field::add(x, y);
+                prime_field::add_modulo(x, y);
             }
         });
     });
@@ -33,7 +33,7 @@ fn add_benchmark(c: &mut Criterion) {
     add_group.bench_function(id, |bencher| {
         bencher.iter(|| {
             for (&x, &y) in operands.iter().tuple_windows() {
-                prime_field::add_fast(x, y);
+                prime_field::add_with_sub_u128(x, y);
             }
         });
     });
@@ -70,7 +70,7 @@ fn mul_benchmark(c: &mut Criterion) {
     mul_group.bench_function(id, |bencher| {
         bencher.iter(|| {
             for (&x, &y) in operands.iter().tuple_windows() {
-                prime_field::mul(x, y);
+                prime_field::mul_modulo(x, y);
             }
         });
     });
